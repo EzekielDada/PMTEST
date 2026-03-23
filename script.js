@@ -216,7 +216,19 @@ function bindModalControls() {
   }
 
   document.querySelectorAll("[data-modal-close]").forEach((button) => {
-    button.addEventListener("click", () => closeActiveModal("button"));
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeActiveModal("button");
+    });
+  });
+
+  document.querySelectorAll(".modal").forEach((modal) => {
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeActiveModal("backdrop");
+      }
+    });
   });
 
   document.addEventListener("keydown", (event) => {
