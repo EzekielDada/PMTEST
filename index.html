@@ -175,6 +175,7 @@
             data-event-name="contact_sales_form_submit_button_clicked"
             data-event-source="contact_form"
             data-event-label="Request demo"
+            data-track-click="true"
           >
             Request demo
           </button>
@@ -185,23 +186,11 @@
   </main>
 
   <div class="debug-pill" id="debugPill" aria-live="polite">
-    <span id="debugAmplitude">Amplitude: checking...</span>
+    <span id="debugAmplitude">Tracking: checking...</span>
     <span id="debugEvent">Last click: none</span>
   </div>
 
   <div class="toast" id="toast" aria-live="polite" hidden></div>
-
-  <script src="https://cdn.amplitude.com/libs/analytics-browser-2.11.0-min.js"></script>
-  <script>
-    if (window.amplitude) {
-      if (typeof window.amplitude.init === "function") {
-        window.amplitude.init("799ef184626df359bb25f889e76e4515", {
-          defaultTracking: true,
-          serverZone: "US"
-        });
-      }
-    }
-  </script>
   <script src="script.js"></script>
 </body>
 </html>

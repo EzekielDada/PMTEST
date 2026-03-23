@@ -1,6 +1,7 @@
 const toast = document.getElementById("toast");
 const debugAmplitude = document.getElementById("debugAmplitude");
 const debugEvent = document.getElementById("debugEvent");
+const TRACKING_ENDPOINT = "/api/amplitude";
 const sessionId = crypto.randomUUID();
 
 function showToast(message) {
@@ -23,16 +24,9 @@ function buildPayload(properties = {}) {
   };
 }
 
-function hasAmplitude() {
-  return (
-    typeof window.amplitude !== "undefined" &&
-    (typeof window.amplitude.logEvent === "function" || typeof window.amplitude.track === "function")
-  );
-}
-
-function updateDebugStatus(amplitudeReady, lastEvent = null) {
+function updateDebugStatus(trackingReady, lastEvent = null) {
   if (debugAmplitude) {
-    debugAmplitude.textContent = `Amplitude: ${amplitudeReady ? "ready" : "not ready"}`;
+    debugAmplitude.textContent = `Tracking: ${trackingReady ? "ready" : "not ready"}`;
   }
 
   if (debugEvent && lastEvent) {
@@ -40,52 +34,49 @@ function updateDebugStatus(amplitudeReady, lastEvent = null) {
   }
 }
 
-function sendToAmplitude(eventName, payload) {
-  if (!hasAmplitude()) {
-    console.info("[basic analytics fallback]", eventName, payload);
-    updateDebugStatus(false, eventName);
-    return;
+function sendTrackingEvent(eventName, payload) {
+  const requestBody = JSON.stringify({ eventName, payload });
+
+  if (navigator.sendBeacon) {
+    const beaconQueued = navigator.sendBeacon(
+      TRACKING_ENDPOINT,
+      new Blob([requestBody], { type: "application/json" })
+    );
+
+    if (beaconQueued) {
+      updateDebugStatus(true, eventName);
+      return Promise.resolve();
+    }
   }
 
-  try {
-    if (typeof window.amplitude.logEvent === "function") {
-      window.amplitude.logEvent(eventName, payload);
-    } else {
-      window.amplitude.track(eventName, payload);
-    }
+  return fetch(TRACKING_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: requestBody,
+    keepalive: true
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Tracking proxy returned ${response.status}`);
+      }
 
-    if (typeof window.amplitude.flush === "function") {
-      window.amplitude.flush();
-    }
-
-    updateDebugStatus(true, eventName);
-  } catch (error) {
-    console.warn("[amplitude track failed]", eventName, error);
-    updateDebugStatus(false, eventName);
-  }
+      updateDebugStatus(true, eventName);
+    })
+    .catch((error) => {
+      console.warn("[tracking proxy failed]", eventName, error);
+      console.info("[basic analytics fallback]", eventName, payload);
+      updateDebugStatus(false, eventName);
+    });
 }
 
 function trackEvent(eventName, properties = {}) {
   const payload = buildPayload(properties);
-  sendToAmplitude(eventName, payload);
-  console.info("[event logged]", eventName, payload);
-}
-
-function waitForAmplitude() {
-  return new Promise((resolve) => {
-    if (hasAmplitude()) {
-      resolve();
-      return;
-    }
-
-    const startedAt = Date.now();
-    const intervalId = window.setInterval(() => {
-      if (hasAmplitude() || Date.now() - startedAt > 5000) {
-        window.clearInterval(intervalId);
-        resolve();
-      }
-    }, 100);
+  sendTrackingEvent(eventName, payload).catch(() => {
+    updateDebugStatus(false, eventName);
   });
+  console.info("[event logged]", eventName, payload);
 }
 
 function scrollToTarget(targetId) {
@@ -136,8 +127,4 @@ function trackLandingView() {
 
 bindTrackedClicks();
 trackLandingView();
-
-waitForAmplitude().finally(() => {
-  updateDebugStatus(hasAmplitude());
-  console.info("[amplitude ready]", hasAmplitude());
-});
+updateDebugStatus(true);
