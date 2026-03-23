@@ -28,6 +28,7 @@
             data-event-source="header"
             data-event-label="Log in"
             data-modal-target="loginModal"
+            data-track-click="true"
           >
             Log in
           </button>
@@ -38,6 +39,7 @@
             data-event-source="header"
             data-event-label="Contact Sales"
             data-scroll-target="contact-sales"
+            data-track-click="true"
           >
             Contact Sales
           </button>
@@ -63,6 +65,7 @@
               data-event-name="hero_start_building_button_clicked"
               data-event-source="hero"
               data-event-label="Start Building"
+              data-track-click="true"
             >
               Start Building
             </button>
@@ -73,6 +76,7 @@
               data-event-source="hero"
               data-event-label="Contact Sales"
               data-scroll-target="contact-sales"
+              data-track-click="true"
             >
               Contact Sales
             </button>
@@ -181,6 +185,11 @@
     </section>
   </main>
 
+  <div class="debug-pill" id="debugPill" aria-live="polite">
+    <span id="debugAmplitude">Amplitude: checking...</span>
+    <span id="debugEvent">Last click: none</span>
+  </div>
+
   <div class="modal-backdrop" id="modalBackdrop" hidden></div>
 
   <section class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle" hidden>
@@ -212,9 +221,6 @@
           <button
             class="cta primary"
             type="submit"
-            data-event-name="login_form_submit_button_clicked"
-            data-event-source="login_modal"
-            data-event-label="Log in"
           >
             Log in
           </button>
@@ -222,9 +228,6 @@
             class="cta secondary"
             type="button"
             data-modal-close
-            data-event-name="login_modal_cancel_button_clicked"
-            data-event-source="login_modal"
-            data-event-label="Cancel login"
           >
             Cancel
           </button>

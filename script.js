@@ -1,9 +1,9 @@
 const toast = document.getElementById("toast");
-const contactSalesForm = document.getElementById("contactSalesForm");
 const loginForm = document.getElementById("loginForm");
 const modalBackdrop = document.getElementById("modalBackdrop");
+const debugAmplitude = document.getElementById("debugAmplitude");
+const debugEvent = document.getElementById("debugEvent");
 const sessionId = crypto.randomUUID();
-let formStarted = false;
 let activeModal = null;
 let lastFocusedElement = null;
 
@@ -28,12 +28,26 @@ function buildPayload(properties = {}) {
 }
 
 function hasAmplitude() {
-  return typeof window.amplitude !== "undefined" && typeof window.amplitude.track === "function";
+  return (
+    typeof window.amplitude !== "undefined" &&
+    (typeof window.amplitude.logEvent === "function" || typeof window.amplitude.track === "function")
+  );
+}
+
+function updateDebugStatus(amplitudeReady, lastEvent = null) {
+  if (debugAmplitude) {
+    debugAmplitude.textContent = `Amplitude: ${amplitudeReady ? "ready" : "not ready"}`;
+  }
+
+  if (debugEvent && lastEvent) {
+    debugEvent.textContent = `Last click: ${lastEvent}`;
+  }
 }
 
 function sendToAmplitude(eventName, payload) {
   if (!hasAmplitude()) {
     console.info("[basic analytics fallback]", eventName, payload);
+    updateDebugStatus(false, eventName);
     return;
   }
 
@@ -47,8 +61,11 @@ function sendToAmplitude(eventName, payload) {
     if (typeof window.amplitude.flush === "function") {
       window.amplitude.flush();
     }
+
+    updateDebugStatus(true, eventName);
   } catch (error) {
     console.warn("[amplitude track failed]", eventName, error);
+    updateDebugStatus(false, eventName);
   }
 }
 
@@ -90,15 +107,9 @@ function scrollToTarget(targetId) {
 function closeActiveModal(reason = "dismissed") {
   if (!activeModal) return;
 
-  const modalId = activeModal.id;
   activeModal.hidden = true;
   modalBackdrop.hidden = true;
   document.body.classList.remove("modal-open");
-
-  trackEvent("modal_closed", {
-    modal_id: modalId,
-    close_reason: reason
-  });
 
   const elementToRestore = lastFocusedElement;
   activeModal = null;
@@ -123,11 +134,6 @@ function openModal(modalId, trigger) {
   modalBackdrop.hidden = false;
   document.body.classList.add("modal-open");
 
-  trackEvent("modal_opened", {
-    modal_id: modalId,
-    trigger_label: trigger?.getAttribute?.("data-event-label") || trigger?.textContent?.trim() || "unknown"
-  });
-
   const firstInput = modal.querySelector("input, select, textarea, button");
   if (firstInput instanceof HTMLElement) {
     firstInput.focus();
@@ -135,11 +141,11 @@ function openModal(modalId, trigger) {
 }
 
 function bindTrackedClicks() {
-  const buttons = document.querySelectorAll("button");
+  const buttons = document.querySelectorAll("[data-track-click=\"true\"]");
 
   buttons.forEach((button) => {
     button.addEventListener("click", () => {
-      const eventName = button.getAttribute("data-event-name") || "button_clicked";
+      const eventName = button.getAttribute("data-event-name") || "cta_clicked";
       const eventLabel = button.getAttribute("data-event-label") || button.textContent.trim() || "Unlabeled button";
       const eventSource =
         button.getAttribute("data-event-source") ||
@@ -171,48 +177,6 @@ function bindTrackedClicks() {
 function trackLandingView() {
   trackEvent("landing_page_viewed", {
     referrer: document.referrer || "direct"
-  });
-}
-
-function bindContactSalesForm() {
-  if (!contactSalesForm) return;
-
-  contactSalesForm.addEventListener(
-    "focusin",
-    () => {
-      if (formStarted) return;
-
-      formStarted = true;
-      trackEvent("contact_sales_form_started", {
-        form_id: "contact_sales",
-        source: "sales_section"
-      });
-    },
-    { once: true }
-  );
-
-  contactSalesForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    if (!contactSalesForm.reportValidity()) {
-      return;
-    }
-
-    const formData = new FormData(contactSalesForm);
-    const workEmail = String(formData.get("work_email") || "");
-
-    trackEvent("contact_sales_form_submitted", {
-      form_id: "contact_sales",
-      company_name: String(formData.get("company_name") || "").trim(),
-      team_size: String(formData.get("team_size") || ""),
-      use_case: String(formData.get("use_case") || ""),
-      email_domain: getEmailDomain(workEmail),
-      message_length: String(formData.get("message") || "").trim().length
-    });
-
-    showToast("Thanks. Our sales team will reach out shortly.");
-    contactSalesForm.reset();
-    formStarted = false;
   });
 }
 
@@ -249,11 +213,6 @@ function bindModalForms() {
       const formData = new FormData(loginForm);
       const workEmail = String(formData.get("work_email") || "");
 
-      trackEvent("login_form_submitted", {
-        form_id: "login",
-        email_domain: getEmailDomain(workEmail)
-      });
-
       showToast("Login request captured. Redirecting to your workspace soon.");
       loginForm.reset();
       closeActiveModal("submitted");
@@ -263,11 +222,11 @@ function bindModalForms() {
 }
 
 bindTrackedClicks();
-bindContactSalesForm();
 bindModalControls();
 bindModalForms();
 trackLandingView();
 
 waitForAmplitude().finally(() => {
+  updateDebugStatus(hasAmplitude());
   console.info("[amplitude ready]", hasAmplitude());
 });
