@@ -29,10 +29,6 @@ body {
     linear-gradient(180deg, #f9fbf7 0%, #f1f6ef 40%, #edf4ec 100%);
 }
 
-body.modal-open {
-  overflow: hidden;
-}
-
 .page-shell {
   width: min(1120px, calc(100% - 32px));
   margin: 0 auto;
@@ -438,112 +434,6 @@ h1 {
   z-index: 22;
 }
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(7, 15, 12, 0.42);
-  backdrop-filter: blur(10px);
-  z-index: 20;
-}
-
-.modal {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  z-index: 21;
-}
-
-.modal-card {
-  width: min(560px, 100%);
-  padding: 28px;
-  border-radius: 28px;
-  border: 1px solid rgba(13, 27, 22, 0.1);
-  background:
-    radial-gradient(circle at top left, rgba(198, 244, 214, 0.5), transparent 34%),
-    rgba(255, 255, 255, 0.97);
-  box-shadow: 0 28px 70px rgba(8, 23, 16, 0.18);
-}
-
-.modal-close {
-  margin-left: auto;
-  display: block;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.modal-kicker {
-  margin: 8px 0 10px;
-  color: var(--mint);
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-weight: 700;
-}
-
-.modal h2 {
-  margin: 0;
-  font-family: "Instrument Serif", serif;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 0.98;
-}
-
-.modal-copy {
-  margin: 12px 0 0;
-  color: var(--muted);
-  line-height: 1.7;
-}
-
-.modal-form {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 22px;
-}
-
-.modal-form label {
-  display: grid;
-  gap: 8px;
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.modal-form input,
-.modal-form select,
-.modal-form textarea {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid rgba(13, 27, 22, 0.12);
-  border-radius: 16px;
-  background: #fff;
-  color: var(--text);
-  font: inherit;
-}
-
-.modal-form textarea {
-  resize: vertical;
-  min-height: 120px;
-}
-
-.modal-form input:focus,
-.modal-form select:focus,
-.modal-form textarea:focus {
-  outline: 2px solid rgba(12, 159, 106, 0.18);
-  border-color: rgba(12, 159, 106, 0.42);
-}
-
-.modal-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-}
-
 @media (max-width: 900px) {
   .hero-grid {
     grid-template-columns: 1fr;
@@ -583,10 +473,6 @@ h1 {
   }
 
   .contact-form {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-form {
     grid-template-columns: 1fr;
   }
 

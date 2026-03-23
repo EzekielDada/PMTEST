@@ -27,7 +27,6 @@
             data-event-name="header_login_button_clicked"
             data-event-source="header"
             data-event-label="Log in"
-            data-modal-target="loginModal"
             data-track-click="true"
           >
             Log in
@@ -189,52 +188,6 @@
     <span id="debugAmplitude">Amplitude: checking...</span>
     <span id="debugEvent">Last click: none</span>
   </div>
-
-  <div class="modal-backdrop" id="modalBackdrop" hidden></div>
-
-  <section class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle" hidden>
-    <div class="modal-card">
-      <button
-        class="modal-close"
-        type="button"
-        data-modal-close
-        data-event-name="login_modal_close_button_clicked"
-        data-event-source="login_modal"
-        data-event-label="Close login modal"
-        aria-label="Close dialog"
-      >
-        Close
-      </button>
-      <p class="modal-kicker">Workspace access</p>
-      <h2 id="loginModalTitle">Log in to your LedgerLink console.</h2>
-      <p class="modal-copy">Use a work email to access sandbox credentials, connection logs, and onboarding checklists.</p>
-      <form class="modal-form" id="loginForm" novalidate>
-        <label>
-          Work email
-          <input type="email" name="work_email" placeholder="ada@company.com" required>
-        </label>
-        <label>
-          Password
-          <input type="password" name="password" placeholder="Enter your password" required minlength="8">
-        </label>
-        <div class="modal-actions">
-          <button
-            class="cta primary"
-            type="submit"
-          >
-            Log in
-          </button>
-          <button
-            class="cta secondary"
-            type="button"
-            data-modal-close
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  </section>
 
   <div class="toast" id="toast" aria-live="polite" hidden></div>
 
