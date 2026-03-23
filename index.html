@@ -13,10 +13,33 @@
   <main class="page-shell">
     <section class="hero">
       <div class="brand-row">
-        <div class="brand-mark" aria-hidden="true">L</div>
-        <div class="brand-copy">
-          <p class="brand-name">LedgerLink</p>
-          <p class="brand-tag">Financial connectivity for modern B2B platforms</p>
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">L</div>
+          <div class="brand-copy">
+            <p class="brand-name">LedgerLink</p>
+            <p class="brand-tag">Financial connectivity for modern B2B platforms</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button
+            class="nav-link"
+            type="button"
+            data-event-name="login_clicked"
+            data-event-source="header"
+            data-event-label="Log in"
+          >
+            Log in
+          </button>
+          <button
+            class="cta secondary header-cta"
+            type="button"
+            data-event-name="contact_sales_cta_clicked"
+            data-event-source="header"
+            data-event-label="Contact Sales"
+            data-scroll-target="contact-sales"
+          >
+            Contact Sales
+          </button>
         </div>
       </div>
       <p class="eyebrow">Built For B2B Fintech</p>
@@ -33,10 +56,23 @@
             <div class="hero-chip">Structured data for underwriting</div>
           </div>
           <div class="cta-row">
-            <button class="cta primary" data-cta-name="sign_up" data-cta-label="Sign Up">
+            <button
+              class="cta primary"
+              type="button"
+              data-event-name="start_building_clicked"
+              data-event-source="hero"
+              data-event-label="Start Building"
+            >
               Start Building
             </button>
-            <button class="cta secondary" data-cta-name="request_demo" data-cta-label="Request Demo">
+            <button
+              class="cta secondary"
+              type="button"
+              data-event-name="contact_sales_cta_clicked"
+              data-event-source="hero"
+              data-event-label="Contact Sales"
+              data-scroll-target="contact-sales"
+            >
               Contact Sales
             </button>
           </div>
@@ -79,6 +115,68 @@
         <h2>Financial data</h2>
         <p>Access structured transaction and cash flow data for risk models, decisioning, and reporting.</p>
       </article>
+    </section>
+
+    <section class="contact-section" id="contact-sales" aria-labelledby="contact-sales-title">
+      <div class="contact-copy">
+        <p class="section-kicker">Talk with sales</p>
+        <h2 id="contact-sales-title">Tell us about your fintech workflow.</h2>
+        <p>
+          Share a few details and our team will follow up with the right product specialist for onboarding,
+          payments, underwriting, or treasury use cases.
+        </p>
+      </div>
+      <form class="contact-form" id="contactSalesForm" novalidate>
+        <label>
+          Full name
+          <input type="text" name="full_name" placeholder="Ada Okafor" required>
+        </label>
+        <label>
+          Work email
+          <input type="email" name="work_email" placeholder="ada@company.com" required>
+        </label>
+        <label>
+          Company name
+          <input type="text" name="company_name" placeholder="Northwind Capital" required>
+        </label>
+        <label>
+          Team size
+          <select name="team_size" required>
+            <option value="">Select team size</option>
+            <option value="1-10">1-10</option>
+            <option value="11-50">11-50</option>
+            <option value="51-200">51-200</option>
+            <option value="201-500">201-500</option>
+            <option value="500+">500+</option>
+          </select>
+        </label>
+        <label class="full-width">
+          What are you exploring?
+          <select name="use_case" required>
+            <option value="">Select a use case</option>
+            <option value="account-linking">Account linking</option>
+            <option value="payments">Payments</option>
+            <option value="underwriting">Underwriting</option>
+            <option value="treasury">Treasury operations</option>
+          </select>
+        </label>
+        <label class="full-width">
+          What do you need to launch?
+          <textarea name="message" rows="4" placeholder="We want to verify business accounts and reduce onboarding drop-off." required></textarea>
+        </label>
+        <div class="form-actions full-width">
+          <button
+            class="cta primary"
+            type="submit"
+            data-event-name="contact_sales_form_submit_clicked"
+            data-event-source="contact_form"
+            data-event-label="Submit"
+          >
+            Request demo
+          </button>
+          <p class="form-note">No spam. Just product guidance and implementation support.</p>
+        </div>
+      </form>
     </section>
   </main>
 
