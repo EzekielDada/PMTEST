@@ -181,24 +181,34 @@ function trackLandingView() {
 }
 
 function bindModalControls() {
+  const loginModal = document.getElementById("loginModal");
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeActiveModal("escape");
     }
   });
 
-  document.addEventListener("click", (event) => {
-    const closeTrigger = event.target.closest("[data-modal-close]");
-    if (closeTrigger) {
+  document.querySelectorAll("[data-modal-close]").forEach((button) => {
+    button.addEventListener("click", (event) => {
       event.preventDefault();
       closeActiveModal("button");
-      return;
-    }
-
-    if (activeModal && (event.target === activeModal || event.target === modalBackdrop)) {
-      closeActiveModal("backdrop");
-    }
+    });
   });
+
+  if (modalBackdrop) {
+    modalBackdrop.addEventListener("click", () => {
+      closeActiveModal("backdrop");
+    });
+  }
+
+  if (loginModal) {
+    loginModal.addEventListener("click", (event) => {
+      if (!event.target.closest(".modal-card")) {
+        closeActiveModal("backdrop");
+      }
+    });
+  }
 }
 
 function bindModalForms() {
