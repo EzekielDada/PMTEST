@@ -39,7 +39,12 @@ function sendToAmplitude(eventName, payload) {
   }
 
   try {
-    window.amplitude.track(eventName, payload);
+    if (typeof window.amplitude.logEvent === "function") {
+      window.amplitude.logEvent(eventName, payload);
+    } else {
+      window.amplitude.track(eventName, payload);
+    }
+
     if (typeof window.amplitude.flush === "function") {
       window.amplitude.flush();
     }
@@ -211,29 +216,22 @@ function bindContactSalesForm() {
 }
 
 function bindModalControls() {
-  if (modalBackdrop) {
-    modalBackdrop.addEventListener("click", () => closeActiveModal("backdrop"));
-  }
-
-  document.querySelectorAll("[data-modal-close]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      closeActiveModal("button");
-    });
-  });
-
-  document.querySelectorAll(".modal").forEach((modal) => {
-    modal.addEventListener("click", (event) => {
-      if (event.target === modal) {
-        closeActiveModal("backdrop");
-      }
-    });
-  });
-
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeActiveModal("escape");
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    const closeTrigger = event.target.closest("[data-modal-close]");
+    if (closeTrigger) {
+      event.preventDefault();
+      closeActiveModal("button");
+      return;
+    }
+
+    if (activeModal && (event.target === activeModal || event.target === modalBackdrop)) {
+      closeActiveModal("backdrop");
     }
   });
 }

@@ -304,15 +304,13 @@
 
   <div class="toast" id="toast" aria-live="polite" hidden></div>
 
-  <script src="https://cdn.amplitude.com/libs/analytics-browser-2.11.12-min.js.gz"></script>
+  <script src="https://cdn.amplitude.com/libs/analytics-browser-2.11.0-min.js"></script>
   <script>
     if (window.amplitude) {
       if (typeof window.amplitude.init === "function") {
         window.amplitude.init("799ef184626df359bb25f889e76e4515", {
-          autocapture: {
-            pageViews: true,
-            sessions: true
-          }
+          defaultTracking: true,
+          serverZone: "US"
         });
       }
     }
