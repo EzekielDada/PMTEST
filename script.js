@@ -9,16 +9,6 @@ let activeModal = null;
 let lastFocusedElement = null;
 const pendingEvents = [];
 
-const eventAliases = {
-  homepage_viewed: ["landing_page_viewed"],
-  login_clicked: ["cta_clicked"],
-  start_building_clicked: ["cta_clicked"],
-  contact_sales_cta_clicked: ["cta_clicked"],
-  contact_sales_form_submit_clicked: ["cta_clicked"],
-  login_form_submit_clicked: ["cta_clicked"],
-  start_building_form_submit_clicked: ["cta_clicked"]
-};
-
 function showToast(message) {
   if (!toast) return;
 
@@ -51,16 +41,6 @@ function buildPayload(properties = {}) {
 
 function sendToAmplitude(eventName, payload) {
   window.amplitude.track(eventName, payload);
-  const aliases = eventAliases[eventName] || [];
-
-  aliases.forEach((alias) => {
-    window.amplitude.track(alias, {
-      ...payload,
-      original_event_name: eventName,
-      cta_name: payload.label || payload.source || "unknown"
-    });
-  });
-
   flushAmplitude();
 }
 
@@ -163,38 +143,39 @@ function openModal(modalId, trigger) {
 }
 
 function bindTrackedClicks() {
-  document.addEventListener("click", (event) => {
-    const button = event.target.closest("button");
-    if (!button) return;
+  const buttons = document.querySelectorAll("button");
 
-    const eventName = button.getAttribute("data-event-name") || "button_clicked";
-    const eventLabel = button.getAttribute("data-event-label") || button.textContent.trim() || "Unlabeled button";
-    const eventSource =
-      button.getAttribute("data-event-source") ||
-      button.closest("form")?.id ||
-      button.className ||
-      "unknown";
-    const scrollTarget = button.getAttribute("data-scroll-target");
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const eventName = button.getAttribute("data-event-name") || "button_clicked";
+      const eventLabel = button.getAttribute("data-event-label") || button.textContent.trim() || "Unlabeled button";
+      const eventSource =
+        button.getAttribute("data-event-source") ||
+        button.closest("form")?.id ||
+        button.className ||
+        "unknown";
+      const scrollTarget = button.getAttribute("data-scroll-target");
 
-    trackEvent(eventName, {
-      source: eventSource,
-      label: eventLabel,
-      button_type: button.type || "button"
+      trackEvent(eventName, {
+        source: eventSource,
+        label: eventLabel,
+        button_type: button.type || "button"
+      });
+
+      if (scrollTarget) {
+        scrollToTarget(scrollTarget);
+      }
+
+      const modalTarget = button.getAttribute("data-modal-target");
+      if (modalTarget) {
+        openModal(modalTarget, button);
+      }
     });
-
-    if (scrollTarget) {
-      scrollToTarget(scrollTarget);
-    }
-
-    const modalTarget = button.getAttribute("data-modal-target");
-    if (modalTarget) {
-      openModal(modalTarget, button);
-    }
   });
 }
 
 function trackLandingView() {
-  trackEvent("homepage_viewed", {
+  trackEvent("landing_page_viewed", {
     referrer: document.referrer || "direct"
   });
 }
