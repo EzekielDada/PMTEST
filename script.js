@@ -1,7 +1,6 @@
 const toast = document.getElementById("toast");
 const contactSalesForm = document.getElementById("contactSalesForm");
 const loginForm = document.getElementById("loginForm");
-const buildForm = document.getElementById("buildForm");
 const modalBackdrop = document.getElementById("modalBackdrop");
 const sessionId = crypto.randomUUID();
 let formStarted = false;
@@ -162,6 +161,8 @@ function bindTrackedClicks() {
       const modalTarget = button.getAttribute("data-modal-target");
       if (modalTarget) {
         openModal(modalTarget, button);
+      } else if (eventName === "hero_start_building_button_clicked") {
+        showToast("Start building interest captured. Reach out through Contact Sales to continue.");
       }
     });
   });
@@ -259,33 +260,6 @@ function bindModalForms() {
     });
   }
 
-  if (buildForm) {
-    buildForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-
-      if (!buildForm.reportValidity()) {
-        return;
-      }
-
-      const formData = new FormData(buildForm);
-      const workEmail = String(formData.get("work_email") || "");
-      const workflow = String(formData.get("workflow") || "");
-      const companyName = String(formData.get("company_name") || "").trim();
-      const launchGoal = String(formData.get("launch_goal") || "").trim();
-
-      trackEvent("start_building_form_submitted", {
-        form_id: "start_building",
-        email_domain: getEmailDomain(workEmail),
-        workflow,
-        company_name: companyName,
-        launch_goal_length: launchGoal.length
-      });
-
-      showToast("Sandbox request captured. We will follow up with setup details.");
-      buildForm.reset();
-      closeActiveModal("submitted");
-    });
-  }
 }
 
 bindTrackedClicks();

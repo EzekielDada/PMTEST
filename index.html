@@ -63,7 +63,6 @@
               data-event-name="hero_start_building_button_clicked"
               data-event-source="hero"
               data-event-label="Start Building"
-              data-modal-target="buildModal"
             >
               Start Building
             </button>
@@ -228,74 +227,6 @@
             data-event-label="Cancel login"
           >
             Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  </section>
-
-  <section class="modal" id="buildModal" role="dialog" aria-modal="true" aria-labelledby="buildModalTitle" hidden>
-    <div class="modal-card">
-      <button
-        class="modal-close"
-        type="button"
-        data-modal-close
-        data-event-name="start_building_modal_close_button_clicked"
-        data-event-source="start_building_modal"
-        data-event-label="Close start building modal"
-        aria-label="Close dialog"
-      >
-        Close
-      </button>
-      <p class="modal-kicker">Developer onboarding</p>
-      <h2 id="buildModalTitle">Start building with live financial workflows.</h2>
-      <p class="modal-copy">Tell us what you want to launch first and we will provision a sandbox workspace for your team.</p>
-      <form class="modal-form" id="buildForm" novalidate>
-        <label>
-          Full name
-          <input type="text" name="full_name" placeholder="Ada Okafor" required>
-        </label>
-        <label>
-          Work email
-          <input type="email" name="work_email" placeholder="ada@company.com" required>
-        </label>
-        <label>
-          Company name
-          <input type="text" name="company_name" placeholder="Northwind Capital" required>
-        </label>
-        <label>
-          Primary workflow
-          <select name="workflow" required>
-            <option value="">Select a workflow</option>
-            <option value="account-linking">Account linking</option>
-            <option value="account-verification">Account verification</option>
-            <option value="underwriting">Underwriting</option>
-            <option value="payments">Payments</option>
-          </select>
-        </label>
-        <label class="full-width">
-          Launch goal
-          <textarea name="launch_goal" rows="4" placeholder="We want to link business accounts and verify ownership before underwriting." required></textarea>
-        </label>
-        <div class="modal-actions full-width">
-          <button
-            class="cta primary"
-            type="submit"
-            data-event-name="start_building_form_submit_button_clicked"
-            data-event-source="start_building_modal"
-            data-event-label="Create sandbox"
-          >
-            Create sandbox
-          </button>
-          <button
-            class="cta secondary"
-            type="button"
-            data-modal-close
-            data-event-name="start_building_modal_maybe_later_button_clicked"
-            data-event-source="start_building_modal"
-            data-event-label="Maybe later"
-          >
-            Maybe later
           </button>
         </div>
       </form>
