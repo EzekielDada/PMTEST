@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignalStack Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <section class="hero">
+      <p class="eyebrow">Fresh Assessment Build</p>
+      <div class="hero-copy">
+        <h1>Turn product curiosity into clear next steps.</h1>
+        <p class="lede">
+          SignalStack is a lightweight analytics workspace for teams that want to see which experiments
+          move people from first click to booked conversation.
+        </p>
+      </div>
+      <div class="cta-row">
+        <button class="cta primary" data-cta-name="sign_up" data-cta-label="Sign Up">
+          Sign Up
+        </button>
+        <button class="cta secondary" data-cta-name="request_demo" data-cta-label="Request Demo">
+          Request Demo
+        </button>
+      </div>
+      <div class="hero-card">
+        <div class="metric">
+          <span class="metric-value">38%</span>
+          <span class="metric-label">lift in qualified trials</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">12d</span>
+          <span class="metric-label">from first touch to handoff</span>
+        </div>
+        <div class="metric">
+          <span class="metric-value">1 view</span>
+          <span class="metric-label">for funnels, cohorts, and campaign reads</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="proof-strip" aria-label="Product highlights">
+      <article>
+        <h2>Capture intent</h2>
+        <p>Track what visitors click before they ever submit a form.</p>
+      </article>
+      <article>
+        <h2>Read the journey</h2>
+        <p>Build a simple funnel from landing-page visit to CTA engagement.</p>
+      </article>
+      <article>
+        <h2>Segment behavior</h2>
+        <p>Create cohorts for engaged visitors and compare response patterns fast.</p>
+      </article>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" aria-live="polite" hidden></div>
+
+  <script src="https://cdn.amplitude.com/script/799ef184626df359bb25f889e76e4515.js"></script>
+  <script>
+    window.amplitude.add(window.sessionReplay.plugin({ sampleRate: 1 }));
+    window.amplitude.init("799ef184626df359bb25f889e76e4515", {
+      fetchRemoteConfig: true,
+      autocapture: {
+        attribution: true,
+        fileDownloads: true,
+        formInteractions: true,
+        pageViews: true,
+        sessions: true,
+        elementInteractions: true,
+        networkTracking: true,
+        webVitals: true,
+        frustrationInteractions: {
+          thrashedCursor: true,
+          errorClicks: true,
+          deadClicks: true,
+          rageClicks: true
+        }
+      }
+    });
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
