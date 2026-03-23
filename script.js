@@ -3,11 +3,7 @@ const contactSalesForm = document.getElementById("contactSalesForm");
 const loginForm = document.getElementById("loginForm");
 const buildForm = document.getElementById("buildForm");
 const modalBackdrop = document.getElementById("modalBackdrop");
-const AMPLITUDE_API_KEY = "799ef184626df359bb25f889e76e4515";
-const AMPLITUDE_HTTP_API = "https://api2.amplitude.com/2/httpapi";
 const sessionId = crypto.randomUUID();
-const deviceId = getOrCreateDeviceId();
-const sessionStartedAt = Date.now();
 let formStarted = false;
 let activeModal = null;
 let lastFocusedElement = null;
@@ -23,19 +19,6 @@ function showToast(message) {
   }, 2400);
 }
 
-function getOrCreateDeviceId() {
-  const storageKey = "ledgerlink_device_id";
-  const existingId = window.localStorage.getItem(storageKey);
-
-  if (existingId) {
-    return existingId;
-  }
-
-  const newId = crypto.randomUUID();
-  window.localStorage.setItem(storageKey, newId);
-  return newId;
-}
-
 function buildPayload(properties = {}) {
   return {
     ...properties,
@@ -45,59 +28,42 @@ function buildPayload(properties = {}) {
   };
 }
 
-function sendViaHttpApi(eventName, payload) {
-  const requestBody = JSON.stringify({
-    api_key: AMPLITUDE_API_KEY,
-    events: [
-      {
-        event_type: eventName,
-        device_id: deviceId,
-        session_id: sessionStartedAt,
-        event_properties: payload
-      }
-    ]
-  });
-
-  if (navigator.sendBeacon) {
-    const blob = new Blob([requestBody], { type: "application/json" });
-    const beaconQueued = navigator.sendBeacon(AMPLITUDE_HTTP_API, blob);
-    if (beaconQueued) {
-      return;
-    }
-  }
-
-  fetch(AMPLITUDE_HTTP_API, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: requestBody,
-    keepalive: true
-  }).catch((error) => {
-    console.warn("[amplitude http track failed]", eventName, error);
-  });
+function hasAmplitude() {
+  return typeof window.amplitude !== "undefined" && typeof window.amplitude.track === "function";
 }
 
-function flushPendingEvents() {
-  return;
+function sendToAmplitude(eventName, payload) {
+  if (!hasAmplitude()) {
+    console.info("[basic analytics fallback]", eventName, payload);
+    return;
+  }
+
+  try {
+    window.amplitude.track(eventName, payload);
+    if (typeof window.amplitude.flush === "function") {
+      window.amplitude.flush();
+    }
+  } catch (error) {
+    console.warn("[amplitude track failed]", eventName, error);
+  }
 }
 
 function trackEvent(eventName, properties = {}) {
   const payload = buildPayload(properties);
-  sendViaHttpApi(eventName, payload);
-  console.info("[custom event logged]", eventName, payload);
+  sendToAmplitude(eventName, payload);
+  console.info("[event logged]", eventName, payload);
 }
 
 function waitForAmplitude() {
   return new Promise((resolve) => {
-    if (typeof window.amplitude !== "undefined") {
+    if (hasAmplitude()) {
       resolve();
       return;
     }
 
     const startedAt = Date.now();
     const intervalId = window.setInterval(() => {
-      if (typeof window.amplitude !== "undefined" || Date.now() - startedAt > 5000) {
+      if (hasAmplitude() || Date.now() - startedAt > 5000) {
         window.clearInterval(intervalId);
         resolve();
       }
@@ -319,5 +285,5 @@ bindModalForms();
 trackLandingView();
 
 waitForAmplitude().finally(() => {
-  flushPendingEvents();
+  console.info("[amplitude ready]", hasAmplitude());
 });
