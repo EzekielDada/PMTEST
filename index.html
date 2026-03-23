@@ -172,7 +172,7 @@
             type="submit"
             data-event-name="contact_sales_form_submit_clicked"
             data-event-source="contact_form"
-            data-event-label="Submit"
+            data-event-label="Request demo"
           >
             Request demo
           </button>
@@ -186,7 +186,17 @@
 
   <section class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle" hidden>
     <div class="modal-card">
-      <button class="modal-close" type="button" data-modal-close aria-label="Close dialog">Close</button>
+      <button
+        class="modal-close"
+        type="button"
+        data-modal-close
+        data-event-name="login_modal_closed"
+        data-event-source="login_modal"
+        data-event-label="Close login modal"
+        aria-label="Close dialog"
+      >
+        Close
+      </button>
       <p class="modal-kicker">Workspace access</p>
       <h2 id="loginModalTitle">Log in to your LedgerLink console.</h2>
       <p class="modal-copy">Use a work email to access sandbox credentials, connection logs, and onboarding checklists.</p>
@@ -200,8 +210,25 @@
           <input type="password" name="password" placeholder="Enter your password" required minlength="8">
         </label>
         <div class="modal-actions">
-          <button class="cta primary" type="submit">Log in</button>
-          <button class="cta secondary" type="button" data-modal-close>Cancel</button>
+          <button
+            class="cta primary"
+            type="submit"
+            data-event-name="login_form_submit_clicked"
+            data-event-source="login_modal"
+            data-event-label="Log in"
+          >
+            Log in
+          </button>
+          <button
+            class="cta secondary"
+            type="button"
+            data-modal-close
+            data-event-name="login_modal_cancel_clicked"
+            data-event-source="login_modal"
+            data-event-label="Cancel login"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>
@@ -209,7 +236,17 @@
 
   <section class="modal" id="buildModal" role="dialog" aria-modal="true" aria-labelledby="buildModalTitle" hidden>
     <div class="modal-card">
-      <button class="modal-close" type="button" data-modal-close aria-label="Close dialog">Close</button>
+      <button
+        class="modal-close"
+        type="button"
+        data-modal-close
+        data-event-name="start_building_modal_closed"
+        data-event-source="start_building_modal"
+        data-event-label="Close start building modal"
+        aria-label="Close dialog"
+      >
+        Close
+      </button>
       <p class="modal-kicker">Developer onboarding</p>
       <h2 id="buildModalTitle">Start building with live financial workflows.</h2>
       <p class="modal-copy">Tell us what you want to launch first and we will provision a sandbox workspace for your team.</p>
@@ -241,8 +278,25 @@
           <textarea name="launch_goal" rows="4" placeholder="We want to link business accounts and verify ownership before underwriting." required></textarea>
         </label>
         <div class="modal-actions full-width">
-          <button class="cta primary" type="submit">Create sandbox</button>
-          <button class="cta secondary" type="button" data-modal-close>Maybe later</button>
+          <button
+            class="cta primary"
+            type="submit"
+            data-event-name="start_building_form_submit_clicked"
+            data-event-source="start_building_modal"
+            data-event-label="Create sandbox"
+          >
+            Create sandbox
+          </button>
+          <button
+            class="cta secondary"
+            type="button"
+            data-modal-close
+            data-event-name="start_building_modal_dismissed"
+            data-event-source="start_building_modal"
+            data-event-label="Maybe later"
+          >
+            Maybe later
+          </button>
         </div>
       </form>
     </div>
@@ -252,26 +306,33 @@
 
   <script src="https://cdn.amplitude.com/script/799ef184626df359bb25f889e76e4515.js"></script>
   <script>
-    window.amplitude.add(window.sessionReplay.plugin({ sampleRate: 1 }));
-    window.amplitude.init("799ef184626df359bb25f889e76e4515", {
-      fetchRemoteConfig: true,
-      autocapture: {
-        attribution: true,
-        fileDownloads: true,
-        formInteractions: true,
-        pageViews: true,
-        sessions: true,
-        elementInteractions: true,
-        networkTracking: true,
-        webVitals: true,
-        frustrationInteractions: {
-          thrashedCursor: true,
-          errorClicks: true,
-          deadClicks: true,
-          rageClicks: true
-        }
+    if (window.amplitude) {
+      if (window.sessionReplay && typeof window.sessionReplay.plugin === "function" && typeof window.amplitude.add === "function") {
+        window.amplitude.add(window.sessionReplay.plugin({ sampleRate: 1 }));
       }
-    });
+
+      if (typeof window.amplitude.init === "function") {
+        window.amplitude.init("799ef184626df359bb25f889e76e4515", {
+          fetchRemoteConfig: true,
+          autocapture: {
+            attribution: true,
+            fileDownloads: true,
+            formInteractions: true,
+            pageViews: true,
+            sessions: true,
+            elementInteractions: true,
+            networkTracking: true,
+            webVitals: true,
+            frustrationInteractions: {
+              thrashedCursor: true,
+              errorClicks: true,
+              deadClicks: true,
+              rageClicks: true
+            }
+          }
+        });
+      }
+    }
   </script>
   <script src="script.js"></script>
 </body>

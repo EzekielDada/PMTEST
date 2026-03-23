@@ -7,11 +7,16 @@ const sessionId = crypto.randomUUID();
 let formStarted = false;
 let activeModal = null;
 let lastFocusedElement = null;
+const pendingEvents = [];
 
 const eventAliases = {
   homepage_viewed: ["landing_page_viewed"],
+  login_clicked: ["cta_clicked"],
   start_building_clicked: ["cta_clicked"],
-  contact_sales_cta_clicked: ["cta_clicked"]
+  contact_sales_cta_clicked: ["cta_clicked"],
+  contact_sales_form_submit_clicked: ["cta_clicked"],
+  login_form_submit_clicked: ["cta_clicked"],
+  start_building_form_submit_clicked: ["cta_clicked"]
 };
 
 function showToast(message) {
@@ -35,28 +40,48 @@ function flushAmplitude() {
   }
 }
 
-function trackEvent(eventName, properties = {}) {
-  const payload = {
+function buildPayload(properties = {}) {
+  return {
     ...properties,
     page_name: "ledgerlink-homepage",
     session_id: sessionId,
     tracked_at: new Date().toISOString()
   };
+}
+
+function sendToAmplitude(eventName, payload) {
+  window.amplitude.track(eventName, payload);
+  const aliases = eventAliases[eventName] || [];
+
+  aliases.forEach((alias) => {
+    window.amplitude.track(alias, {
+      ...payload,
+      original_event_name: eventName,
+      cta_name: payload.label || payload.source || "unknown"
+    });
+  });
+
+  flushAmplitude();
+}
+
+function flushPendingEvents() {
+  if (!hasAmplitude() || pendingEvents.length === 0) {
+    return;
+  }
+
+  while (pendingEvents.length > 0) {
+    const nextEvent = pendingEvents.shift();
+    sendToAmplitude(nextEvent.eventName, nextEvent.payload);
+  }
+}
+
+function trackEvent(eventName, properties = {}) {
+  const payload = buildPayload(properties);
 
   if (hasAmplitude()) {
-    window.amplitude.track(eventName, payload);
-    const aliases = eventAliases[eventName] || [];
-
-    aliases.forEach((alias) => {
-      window.amplitude.track(alias, {
-        ...payload,
-        original_event_name: eventName,
-        cta_name: payload.label || payload.source || "unknown"
-      });
-    });
-
-    flushAmplitude();
+    sendToAmplitude(eventName, payload);
   } else {
+    pendingEvents.push({ eventName, payload });
     console.info("[demo analytics fallback]", eventName, payload);
   }
 }
@@ -138,29 +163,33 @@ function openModal(modalId, trigger) {
 }
 
 function bindTrackedClicks() {
-  const buttons = document.querySelectorAll("[data-event-name]");
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("button");
+    if (!button) return;
 
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const eventName = button.getAttribute("data-event-name") || "button_clicked";
-      const eventLabel = button.getAttribute("data-event-label") || button.textContent.trim();
-      const eventSource = button.getAttribute("data-event-source") || "unknown";
-      const scrollTarget = button.getAttribute("data-scroll-target");
+    const eventName = button.getAttribute("data-event-name") || "button_clicked";
+    const eventLabel = button.getAttribute("data-event-label") || button.textContent.trim() || "Unlabeled button";
+    const eventSource =
+      button.getAttribute("data-event-source") ||
+      button.closest("form")?.id ||
+      button.className ||
+      "unknown";
+    const scrollTarget = button.getAttribute("data-scroll-target");
 
-      trackEvent(eventName, {
-        source: eventSource,
-        label: eventLabel
-      });
-
-      if (scrollTarget) {
-        scrollToTarget(scrollTarget);
-      }
-
-      const modalTarget = button.getAttribute("data-modal-target");
-      if (modalTarget) {
-        openModal(modalTarget, button);
-      }
+    trackEvent(eventName, {
+      source: eventSource,
+      label: eventLabel,
+      button_type: button.type || "button"
     });
+
+    if (scrollTarget) {
+      scrollToTarget(scrollTarget);
+    }
+
+    const modalTarget = button.getAttribute("data-modal-target");
+    if (modalTarget) {
+      openModal(modalTarget, button);
+    }
   });
 }
 
@@ -280,10 +309,12 @@ function bindModalForms() {
   }
 }
 
+bindTrackedClicks();
+bindContactSalesForm();
+bindModalControls();
+bindModalForms();
+trackLandingView();
+
 waitForAmplitude().finally(() => {
-  trackLandingView();
-  bindTrackedClicks();
-  bindContactSalesForm();
-  bindModalControls();
-  bindModalForms();
+  flushPendingEvents();
 });
