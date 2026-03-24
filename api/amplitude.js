@@ -10,6 +10,7 @@ module.exports = async (req, res) => {
   const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
   const eventName = body.eventName;
   const payload = body.payload || {};
+  const eventTime = payload.tracked_at ? Date.parse(payload.tracked_at) : Date.now();
 
   if (!eventName) {
     return res.status(400).json({ error: "Missing eventName" });
@@ -26,8 +27,11 @@ module.exports = async (req, res) => {
         events: [
           {
             event_type: eventName,
+            time: Number.isFinite(eventTime) ? eventTime : Date.now(),
             session_id: payload.session_id || Date.now(),
             device_id: payload.device_id || "ledgerlink-anonymous-device",
+            user_id: payload.user_id || undefined,
+            insert_id: payload.insert_id || `${payload.device_id || "ledgerlink-anonymous-device"}-${eventName}-${eventTime}`,
             event_properties: payload
           }
         ]

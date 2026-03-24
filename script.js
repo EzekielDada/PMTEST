@@ -4,10 +4,16 @@ const debugEvent = document.getElementById("debugEvent");
 const contactSalesForm = document.getElementById("contactSalesForm");
 const TRACKING_ENDPOINT = "/api/amplitude";
 const STORAGE_KEYS = {
-  deviceId: "ledgerlink_device_id"
+  deviceId: "ledgerlink_device_id",
+  session: "ledgerlink_amplitude_session"
 };
 const deviceId = getOrCreateDeviceId();
-const sessionId = Date.now();
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
+const sessionId = getOrCreateSessionId();
+
+function now() {
+  return Date.now();
+}
 
 function getOrCreateDeviceId() {
   try {
@@ -26,6 +32,36 @@ function getOrCreateDeviceId() {
   }
 }
 
+function getOrCreateSessionId() {
+  const timestamp = now();
+
+  try {
+    const rawSession = window.sessionStorage.getItem(STORAGE_KEYS.session);
+    const parsedSession = rawSession ? JSON.parse(rawSession) : null;
+    const isActiveSession =
+      parsedSession &&
+      typeof parsedSession.id === "number" &&
+      typeof parsedSession.lastTouchedAt === "number" &&
+      timestamp - parsedSession.lastTouchedAt < SESSION_TIMEOUT_MS;
+
+    const nextSession = isActiveSession
+      ? {
+          id: parsedSession.id,
+          lastTouchedAt: timestamp
+        }
+      : {
+          id: timestamp,
+          lastTouchedAt: timestamp
+        };
+
+    window.sessionStorage.setItem(STORAGE_KEYS.session, JSON.stringify(nextSession));
+    return nextSession.id;
+  } catch (error) {
+    console.warn("[session id unavailable]", error);
+    return timestamp;
+  }
+}
+
 function showToast(message) {
   if (!toast) return;
 
@@ -38,12 +74,18 @@ function showToast(message) {
 }
 
 function buildPayload(properties = {}) {
+  const trackedAt = new Date().toISOString();
+
   return {
     ...properties,
     page_name: "ledgerlink-homepage",
     device_id: deviceId,
+    user_id: `anon_${deviceId}`,
     session_id: sessionId,
-    tracked_at: new Date().toISOString()
+    insert_id: crypto.randomUUID(),
+    tracked_at: trackedAt,
+    page_url: window.location.href,
+    page_path: window.location.pathname
   };
 }
 
@@ -59,18 +101,6 @@ function updateDebugStatus(trackingReady, lastEvent = null) {
 
 function sendTrackingEvent(eventName, payload) {
   const requestBody = JSON.stringify({ eventName, payload });
-
-  if (navigator.sendBeacon) {
-    const beaconQueued = navigator.sendBeacon(
-      TRACKING_ENDPOINT,
-      new Blob([requestBody], { type: "application/json" })
-    );
-
-    if (beaconQueued) {
-      updateDebugStatus(true, eventName);
-      return Promise.resolve();
-    }
-  }
 
   return fetch(TRACKING_ENDPOINT, {
     method: "POST",
@@ -124,6 +154,9 @@ function bindTrackedClicks() {
       const scrollTarget = button.getAttribute("data-scroll-target");
 
       trackEvent(eventName, {
+        journey_name: eventName === "request_demo_cta_clicked" ? "request_demo" : "general_cta",
+        journey_step: eventName === "request_demo_cta_clicked" ? "cta_clicked" : undefined,
+        journey_step_order: eventName === "request_demo_cta_clicked" ? 2 : undefined,
         source: eventSource,
         label: eventLabel,
         button_type: button.type || "button"
@@ -144,6 +177,9 @@ function bindTrackedClicks() {
 
 function trackLandingView() {
   trackEvent("landing_page_viewed", {
+    journey_name: "request_demo",
+    journey_step: "landing_view",
+    journey_step_order: 1,
     referrer: document.referrer || "direct"
   });
 }
@@ -202,6 +238,9 @@ function bindRequestDemoJourney() {
     if (!hasStartedFormJourney) {
       hasStartedFormJourney = true;
       trackEvent("request_demo_form_started", {
+        journey_name: "request_demo",
+        journey_step: "form_started",
+        journey_step_order: 3,
         source: "contact_form",
         first_field: field.name || "unknown"
       });
@@ -216,6 +255,8 @@ function bindRequestDemoJourney() {
 
     if (!validation.isValid) {
       trackEvent("request_demo_form_validation_failed", {
+        journey_name: "request_demo",
+        journey_step: "form_validation_failed",
         source: "contact_form",
         invalid_fields: validation.missingFields,
         invalid_field_count: validation.missingFields.length
@@ -225,6 +266,9 @@ function bindRequestDemoJourney() {
     }
 
     trackEvent("request_demo_form_submitted", {
+      journey_name: "request_demo",
+      journey_step: "form_submitted",
+      journey_step_order: 4,
       source: "contact_form",
       team_size: values.team_size,
       use_case: values.use_case,
