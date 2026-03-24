@@ -26,8 +26,8 @@ module.exports = async (req, res) => {
         events: [
           {
             event_type: eventName,
-            session_id: Date.now(),
-            device_id: payload.session_id || "ledgerlink-anonymous-device",
+            session_id: payload.session_id || Date.now(),
+            device_id: payload.device_id || "ledgerlink-anonymous-device",
             event_properties: payload
           }
         ]
