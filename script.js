@@ -135,8 +135,8 @@ function bindTrackedClicks() {
 
       if (eventName === "header_login_button_clicked") {
         showToast("Login flow removed. Reach out through Contact Sales if you need access.");
-      } else if (eventName === "hero_start_building_button_clicked") {
-        showToast("Start building interest captured. Reach out through Contact Sales to continue.");
+      } else if (eventName === "request_demo_cta_clicked") {
+        showToast("Tell us a bit about your workflow to request a demo.");
       }
     });
   });
